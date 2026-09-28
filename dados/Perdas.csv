@@ -1,0 +1,16 @@
+Id Perdas,Data,O.P.,Maquina,Motivo ,Quantidade_Kg
+1,01/09/2026,OP001,Lam-01,Falha de aderência,50
+2,01/09/2026,OP001,Lam-01,Ajuste de máquina,30
+3,02/09/2026,OP002,Lam-02,Bobina fora de especificação,80
+4,02/09/2026,OP002,Lam-02,Setup,40
+5,03/09/2026,OP003,Lam-01,Emenda,30
+6,04/09/2026,OP004,Lam-03,Problema de matéria-prima,100
+7,04/09/2026,OP004,Lam-03,Ajuste de máquina,60
+8,05/09/2026,OP005,Lam-02,Falha de aderência,50
+9,06/09/2026,OP006,Lam-01,Emenda,40
+10,07/09/2026,OP007,Lam-03,Setup,30
+11,08/09/2026,OP008,Lam-02,Bobina fora de especificação,90
+12,08/09/2026,OP008,Lam-02,Falha de aderência,60
+13,09/09/2026,OP009,Lam-01,Ajuste de máquina,30
+14,10/09/2026,OP010,Lam-03,Problema de matéria-prima,80
+15,10/09/2026,OP010,Lam-03,Emenda,40

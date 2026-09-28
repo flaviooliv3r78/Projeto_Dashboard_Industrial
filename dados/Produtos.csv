@@ -1,0 +1,9 @@
+ID_Produto,Produto,Segmento,Estrutura,Largura_mm
+1,PET/PE,Alimentos,PET + PE,1000
+2,BOPP/PE,Alimentos,BOPP + PE,1200
+3,PET/PEBD,Alimentos,PET + PEBD,1000
+4,PET/Al/PE,Alimentos,PET + Alumínio + PE,1000
+5,PET/PE,Cosméticos,PET + PE,900
+6,BOPP/PE,Cosméticos,BOPP + PE,1000
+7,PET/PEBD,Cosméticos,PET + PEBD,900
+8,PET/Al/PE,Alimentos,PET + Alumínio + PE,1200
