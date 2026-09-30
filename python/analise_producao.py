@@ -911,7 +911,15 @@ resumo = pd.DataFrame(
 # ============================================================
 # 12. EXPORTAÇÃO DOS DADOS PROCESSADOS
 # ============================================================
+maquinas.to_csv(
+    processados_dir / "maquinas_tratadas.csv",
+    index=False
+)
 
+produtos.to_csv(
+    processados_dir / "produtos_tratados.csv",
+    index=False
+)
 producao.to_csv(
     processados_dir /
     "producao_tratada.csv",

@@ -1,0 +1,6 @@
+ID_Maquina,Maquina,Tipo,Linha,Capacidade_Kg_Hora
+1,Lam-01,Laminadora,Linha 1,700
+2,Lam-02,Laminadora,Linha 2,800
+3,Lam-03,Laminadora,Linha 3,600
+4,Lam-04,Laminadora,Linha 1,750
+5,Lam-05,Laminadora,Linha 2,650
