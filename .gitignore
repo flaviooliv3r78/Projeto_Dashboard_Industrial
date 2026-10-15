@@ -1,0 +1,17 @@
+﻿# Arquivos temporários do Windows
+Thumbs.db
+Desktop.ini
+
+# Configurações locais e segredos
+.env.*
+!.env.example
+
+# Arquivos temporários de editores
+.vscode/
+
+.venv/
+venv/
+__pycache__/
+*.pyc
+.env
+*.log

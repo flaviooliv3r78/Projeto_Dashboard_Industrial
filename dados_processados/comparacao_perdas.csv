@@ -1,4 +1,4 @@
-Maquina,Perda_Producao_Kg,Perda_Detalhada_Kg,Diferenca_Kg
-Lam-01,550.0,180.0,370.0
-Lam-02,500.0,320.0,180.0
-Lam-03,480.0,310.0,170.0
+Perda_Producao_Kg,Perda_Detalhada_Kg,Diferenca_Kg
+550.0,180,370.0
+500.0,320,180.0
+480.0,310,170.0

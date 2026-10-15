@@ -1,11 +1,19 @@
-Indicador,Valor
-Status geral da qualidade,ATENÇÃO
-Registros produção,11
-Registros perdas,15
-Duplicados produção,0
-Duplicados perdas,0
-Máquinas sem cadastro,0
-Produtos sem cadastro,0
-Perda produção (kg),1530.0
-Perda detalhada (kg),810.0
-Diferença de perdas (kg),720.0
+Indicador,Valor,ValorTexto,ValorNumerico
+Status geral da qualidade,ATENÇÃO,ATENÇÃO,
+Registros produção,11,,11.0
+Registros perdas,15,,15.0
+Duplicados produção,0,,0.0
+Duplicados perdas,0,,0.0
+Máquinas sem cadastro,0,,0.0
+Produtos sem cadastro,0,,0.0
+Perda produção (kg),1530.0,,1530.0
+Perda detalhada (kg),810,,810.0
+Diferença de perdas (kg),720.0,,720.0
+Divergências percentual de perdas,0,,0.0
+Valores numéricos negativos,0,,0.0
+Registros com meta igual a zero,0,,0.0
+Registros com horas iguais a zero,0,,0.0
+Datas ausentes ou inválidas,0,,0.0
+Registros sem meta,0,,0.0
+Registros sem produção,0,,0.0
+Registros sem perda informada,0,,0.0

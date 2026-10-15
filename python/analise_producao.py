@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import numpy as np
 import pandas as pd
 
 
@@ -43,36 +43,43 @@ def localizar_csv(nome_arquivo):
 # 2. FUNÇÕES DE LIMPEZA
 # ============================================================
 
-def limpar_numero(valor):
 
+def limpar_numero(valor):
     if pd.isna(valor):
         return None
 
     texto = str(valor).strip()
+    texto = texto.replace("%", "").replace(" ", "")
 
     if texto == "":
         return None
 
-    texto = texto.replace(".", "")
-    texto = texto.replace("%", "")
-    texto = texto.replace(" ", "")
-    texto = texto.replace(",", ".")
+    # Se houver vírgula e ponto, o último separador
+    # será considerado o separador decimal.
+    if "," in texto and "." in texto:
+        if texto.rfind(",") > texto.rfind("."):
+            # Exemplo: 1.234,56 -> 1234.56
+            texto = texto.replace(".", "").replace(",", ".")
+        else:
+            # Exemplo: 1,234.56 -> 1234.56
+            texto = texto.replace(",", "")
 
-    try:
-        return float(texto)
+    elif "," in texto:
+        # Exemplo: 7,2 -> 7.2
+        texto = texto.replace(",", ".")
 
-    except ValueError:
-        return None
+    # Se houver somente ponto, preserva o decimal.
+    return float(texto)
 
 
 def limpar_percentual(valor):
-
     numero = limpar_numero(valor)
 
     if numero is None:
         return None
 
     return numero / 100 if numero > 1 else numero
+
 
 
 # ============================================================
@@ -147,17 +154,16 @@ producao["Percentual_Perdas"] = (
     producao["Percentual_Perdas"]
     .apply(limpar_percentual)
 )
+# ---------- Validação do percentual de perdas ----------
+
+
 
 
 # ============================================================
 # 6. LIMPEZA DA TABELA DE PERDAS
 # ============================================================
 
-perdas["Quantidade_Kg"] = (
-    perdas["Quantidade_Kg"]
-    .apply(limpar_numero)
-)
-
+# Padronizar as datas das perdas detalhadas
 
 perdas["Data"] = pd.to_datetime(
     perdas["Data"],
@@ -166,11 +172,36 @@ perdas["Data"] = pd.to_datetime(
 )
 
 
+
+
 # ============================================================
 # 7. VALIDAÇÃO DE QUALIDADE DOS DADOS
 # ============================================================
 
 problemas = []
+
+# Validação do percentual de perdas
+percentual_perdas_calculado = (
+    producao["Perda_Kg"]
+    / producao["Produzido_Kg"].replace(0, np.nan)
+)
+
+divergencias_percentual_perdas = (
+    (
+        producao["Percentual_Perdas"]
+        - percentual_perdas_calculado
+    ).abs() > 0.005
+).sum()
+
+if divergencias_percentual_perdas > 0:
+    problemas.append(
+        "Produção: "
+        f"{divergencias_percentual_perdas} "
+        "registro(s) com percentual de perdas "
+        "diferente do valor calculado."
+    )
+
+# A validação de datas continua abaixo...
 
 
 # ---------- Datas ----------
@@ -245,44 +276,46 @@ if linhas_nulas_perda > 0:
     )
 
 
+
 # ---------- Valores negativos ----------
 
-for coluna in [
-    "Meta_Kg",
-    "Produzido_Kg",
-    "Perda_Kg",
-    "Horas_Producao"
-]:
+# ---------- Contagem de valores negativos ----------
 
-    quantidade_negativa = (
-        producao[coluna] < 0
-    ).sum()
-
-
-    if quantidade_negativa > 0:
-
-        problemas.append(
-            f"Produção: "
-            f"{quantidade_negativa} "
-            f"valor(es) negativo(s) "
-            f"em {coluna}."
-        )
-
+total_valores_negativos = sum(
+    (producao[coluna] < 0).sum()
+    for coluna in [
+        "Meta_Kg",
+        "Produzido_Kg",
+        "Perda_Kg",
+        "Horas_Producao",
+    ]
+)
 
 # ---------- Meta igual a zero ----------
 
-meta_zero = (
+metas_zero = (
     producao["Meta_Kg"] == 0
 ).sum()
 
-
-if meta_zero > 0:
-
+if metas_zero > 0:
     problemas.append(
-        f"Produção: "
-        f"{meta_zero} "
-        f"registro(s) com meta igual a zero."
+        f"Produção: {metas_zero} "
+        "registro(s) com meta igual a zero."
     )
+
+# ---------- Horas de produção iguais a zero ----------
+
+horas_zero = (
+    producao["Horas_Producao"] == 0
+).sum()
+
+if horas_zero > 0:
+    problemas.append(
+        f"Produção: {horas_zero} "
+        "registro(s) com horas de produção iguais a zero."
+    )
+
+
 
 
 # ---------- Duplicidades ----------
@@ -463,7 +496,7 @@ if diferenca_perdas != 0:
     problemas.append(
         f"Divergência de perdas: "
         f"{round(diferenca_perdas, 2)} kg "
-        f"entre produção e perdas detalhadas."
+        "entre produção e perdas detalhadas."
     )
 
 
@@ -560,6 +593,42 @@ comparacao_perdas = (
         ascending=False
     )
 )
+
+# Comparação de perdas por data e máquina
+
+perda_producao_data_maquina = (
+    producao.groupby(["Data", "Maquina"])["Perda_Kg"]
+    .sum()
+    .rename("Perda_Producao_Kg")
+)
+
+perda_detalhada_data_maquina = (
+    perdas.groupby(["Data", "Maquina"])["Quantidade_Kg"]
+    .sum()
+    .rename("Perda_Detalhada_Kg")
+)
+
+comparacao_perdas_data_maquina = pd.concat(
+    [
+        perda_producao_data_maquina,
+        perda_detalhada_data_maquina
+    ],
+    axis=1
+).fillna(0).reset_index()
+
+comparacao_perdas_data_maquina["Diferenca_Kg"] = (
+    comparacao_perdas_data_maquina["Perda_Producao_Kg"]
+    - comparacao_perdas_data_maquina["Perda_Detalhada_Kg"]
+)
+
+comparacao_perdas_data_maquina["Situacao"] = (
+    comparacao_perdas_data_maquina["Diferenca_Kg"]
+    .apply(
+        lambda x: "Conciliado" if abs(x) < 0.01
+        else "Divergência"
+    )
+)
+
 
 
 # ============================================================
@@ -796,6 +865,22 @@ qualidade = pd.DataFrame(
             "Perda detalhada (kg)",
 
             "Diferença de perdas (kg)",
+
+            "Divergências percentual de perdas",
+
+              "Valores numéricos negativos",
+
+            "Registros com meta igual a zero",
+
+            "Registros com horas iguais a zero",
+
+             "Datas ausentes ou inválidas",
+
+              "Registros sem meta",
+
+              "Registros sem produção",
+
+              "Registros sem perda informada",
         ],
 
         "Valor": [
@@ -828,6 +913,21 @@ qualidade = pd.DataFrame(
                 diferenca_perdas,
                 2
             ),
+
+            int(divergencias_percentual_perdas),
+
+                        int(total_valores_negativos),
+
+            int(metas_zero),
+
+            int(horas_zero),
+                        int(linhas_nulas_data),
+
+            int(linhas_nulas_meta),
+
+            int(linhas_nulas_producao),
+
+            int(linhas_nulas_perda),
         ],
     }
 )
@@ -913,45 +1013,75 @@ resumo = pd.DataFrame(
 # ============================================================
 maquinas.to_csv(
     processados_dir / "maquinas_tratadas.csv",
-    index=False
+    index=False,
+    encoding="utf-8"
 )
 
 produtos.to_csv(
     processados_dir / "produtos_tratados.csv",
-    index=False
+    index=False,
+    encoding="utf-8"
 )
 producao.to_csv(
     processados_dir /
     "producao_tratada.csv",
-    index=False
+    index=False,
+    encoding="utf-8"
 )
 
 
 perdas.to_csv(
     processados_dir /
     "perdas_tratadas.csv",
-    index=False
+    index=False,
+    encoding="utf-8"
 )
 
 
 resumo.to_csv(
     processados_dir /
     "resumo_industrial.csv",
-    index=False
+    index=False,
+    encoding="utf-8"
+)
+
+# Separar valores textuais e numéricos para o Power BI
+
+qualidade["ValorTexto"] = qualidade["Valor"].astype(str).where(
+    qualidade["Indicador"] == "Status geral da qualidade",
+    ""
+)
+
+qualidade["ValorNumerico"] = pd.to_numeric(
+    qualidade["Valor"].where(
+        qualidade["Indicador"] != "Status geral da qualidade"
+    ),
+    errors="coerce"
 )
 
 
 qualidade.to_csv(
     processados_dir /
     "qualidade_dados.csv",
-    index=False
+    index=False,
+    encoding="utf-8"
 )
+
 
 
 comparacao_perdas.to_csv(
-    processados_dir /
-    "comparacao_perdas.csv"
+    processados_dir / "comparacao_perdas.csv",
+    index=False,
+    encoding="utf-8"
 )
+
+comparacao_perdas_data_maquina.to_csv(
+    processados_dir / "comparacao_perdas_data_maquina.csv",
+    index=False,
+    encoding="utf-8"
+)
+
+
 
 
 indicadores_maquinas.to_csv(

@@ -1,0 +1,11 @@
+Data,Maquina,Perda_Producao_Kg,Perda_Detalhada_Kg,Diferenca_Kg,Situacao
+2026-09-01,Lam-01,240.0,80,160.0,Divergência
+2026-09-02,Lam-02,180.0,120,60.0,Divergência
+2026-09-03,Lam-01,90.0,30,60.0,Divergência
+2026-09-04,Lam-03,210.0,160,50.0,Divergência
+2026-09-05,Lam-02,100.0,50,50.0,Divergência
+2026-09-06,Lam-01,150.0,40,110.0,Divergência
+2026-09-07,Lam-03,80.0,30,50.0,Divergência
+2026-09-08,Lam-02,220.0,150,70.0,Divergência
+2026-09-09,Lam-01,70.0,30,40.0,Divergência
+2026-09-10,Lam-03,190.0,120,70.0,Divergência
